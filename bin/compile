@@ -1,1 +1,2 @@
-echo "Compile ju"
+yarn
+yarn workspace seneque-ui run build -e production
