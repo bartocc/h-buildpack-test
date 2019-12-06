@@ -1,2 +1,3 @@
-yarn
+echo `pwd`
+echo `ls`
 yarn workspace seneque-ui run build -e production
