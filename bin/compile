@@ -1,3 +1,9 @@
 echo `pwd`
 echo `ls`
+echo $BUILD_DIR
+echo $CACHE_DIR
+echo $ENV_DIR
+echo `ls $ENV_DIR`
+echo $BP_DIR
+
 yarn workspace seneque-ui run build -e production
