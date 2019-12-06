@@ -14,4 +14,4 @@ BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
 
 cd $BUILD_DIR
 yarn
-yarn workspace seneque-ui run build -e production
+yarn workspace `cat $ENV_DIR/YARN_WORKSPACE` run `cat $ENV_DIR/YARN_RUN_COMMAND`
