@@ -1,1 +1,9 @@
-echo "ju buildpack app"
+#!/usr/bin/env bash
+# bin/detect <build-dir>
+
+if [ -f "$1/package.json" ] && cat "$1/package.json" | grep -q -w workspaces; then
+  echo "Yarn workspaces"
+  exit 0
+fi
+
+exit 1
