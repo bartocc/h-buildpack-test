@@ -12,6 +12,12 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
 
+get_os() {
+  uname | tr '[:upper:]' '[:lower:]'
+}
+
+JQ="$BP_DIR/vendor/jq-$(get_os)"
+
 ### from https://github.com/heroku/heroku-buildpack-nodejs/blob/master/lib/json.sh#L5
 read_json() {
   local file="$1"
