@@ -14,15 +14,4 @@ BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
 
 cd $BUILD_DIR
 
-# Restore yarn cache
-# taken from https://github.com/heroku/heroku-buildpack-nodejs/blob/09eedb8/lib/cache.sh#L52
-yarn_cache_dir=`yarn cache dir`
-echo yarn_cache_dir: $yarn_cache_dir
-if [[ -d "$CACHE_DIR/node/cache/yarn" ]]; then
-  rm -rf "$yarn_cache_dir"
-  mv "$cache_dir/node/cache/yarn" "$yarn_cache_dir"
-  echo "- yarn cache"
-fi
-
-yarn
 yarn workspace `cat $ENV_DIR/YARN_WORKSPACE` run `cat $ENV_DIR/YARN_RUN_COMMAND`
