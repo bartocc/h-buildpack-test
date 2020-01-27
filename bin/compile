@@ -12,6 +12,23 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
 
+### from https://github.com/heroku/heroku-buildpack-nodejs/blob/master/lib/json.sh#L5
+read_json() {
+  local file="$1"
+  local key="$2"
+
+  if test -f "$file"; then
+    # -c = print on only one line
+    # -M = strip any color
+    # --raw-output = if the filter’s result is a string then it will be written directly 
+    #                to stdout rather than being formatted as a JSON string with quotes
+    # shellcheck disable=SC2002
+    cat "$file" | $JQ -c -M --raw-output "$key // \"\"" || return 1
+  else
+    echo ""
+  fi
+}
+
 ### from https://github.com/heroku/heroku-buildpack-nodejs/blob/master/lib/cache.sh#L34
 get_cache_directories() {
   local build_dir="$1"
