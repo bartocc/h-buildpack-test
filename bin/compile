@@ -12,10 +12,52 @@ CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
 
-cd $BUILD_DIR
+YARN=true;
 
-echo "- node_modules"
-mkdir -p "$(dirname "$BUILD_DIR/node_modules")"
-mv "$CACHE_DIR/node/cache/node_modules" "$BUILD_DIR/node_modules"
+### Adapted from https://github.com/heroku/heroku-buildpack-nodejs/blob/master/bin/compile#L192
+restore_cache() {
+  local cache_status cache_directories restore_cache_start_time
+  restore_cache_start_time=$(nowms)
+
+  cache_status="$(get_cache_status "$CACHE_DIR")"
+  cache_directories="$(get_cache_directories "$BUILD_DIR")"
+
+  if $YARN; then
+    if [ -e "$BUILD_DIR/node_modules" ]; then
+      warn "node_modules checked into source control" "https://blog.heroku.com/node-habits-2016#9-only-git-the-important-bits"
+      rm -rf "$BUILD_DIR/node_modules"
+    fi
+  fi
+
+  if [[ "$cache_status" == "disabled" ]]; then
+    header "Restoring cache"
+    echo "Caching has been disabled because NODE_MODULES_CACHE=${NODE_MODULES_CACHE}"
+  elif [[ "$cache_status" == "valid" ]]; then
+    header "Restoring cache"
+    if [[ "$cache_directories" == "" ]]; then
+      restore_default_cache_directories "$BUILD_DIR" "$CACHE_DIR" "$YARN_CACHE_FOLDER"
+    else
+      restore_custom_cache_directories "$BUILD_DIR" "$CACHE_DIR" "$cache_directories"
+    fi
+  elif [[ "$cache_status" == "new-signature" ]]; then
+    header "Restoring cache"
+    if [[ "$cache_directories" == "" ]]; then
+      echo "Cached directories were not restored due to a change in version of node, npm, yarn or stack"
+      echo "Module installation may take longer for this build"
+    else
+      # If the user has specified custom cache directories, be more explicit
+      echo "Invalidating cache due to a change in version of node, npm, yarn or stack"
+      echo "Will not restore the following directories for this build:"
+      for directory in $cache_directories; do
+        echo "  $directory"
+      done
+    fi
+  else
+    # No cache exists, be silent
+    :
+  fi
+}
+
+restore_cache
 
 yarn workspace `cat $ENV_DIR/YARN_WORKSPACE` run `cat $ENV_DIR/YARN_RUN_COMMAND`
